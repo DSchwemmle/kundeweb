@@ -27,7 +27,7 @@ start
 -> Liste gefundener Buecher;
 :Suchergebnis;
 
-if (mind. 1 Buch gefunden?) then (ja)
+if (mind. 1 Kunde gefunden?) then (ja)
   :GefundeneBuecher;
 else (nein)
   :ErrorMessage;
