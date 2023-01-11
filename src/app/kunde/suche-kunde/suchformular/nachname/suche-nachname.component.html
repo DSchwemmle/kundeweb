@@ -1,0 +1,12 @@
+<mat-form-field appearance="outline" class="userInputField">
+  <mat-label for="nachnameInput">Nachname</mat-label>
+  <input
+    matInput
+    id="nachnameInput"
+    placeholder="Nachname"
+    [(ngModel)]="nachname"
+    autocomplete="off"
+    (blur)="onBlur()"
+  />
+  <mat-hint>Bitte den Nachnamen eingeben</mat-hint>
+</mat-form-field>

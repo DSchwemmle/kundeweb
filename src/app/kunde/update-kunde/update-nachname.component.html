@@ -1,0 +1,15 @@
+<mat-form-field
+  appearance="outline"
+  class="updateInputField"
+  [formGroup]="updateForm"
+>
+  <mat-label for="nachnameInput">Nachname</mat-label>
+  <input
+    id="nachnameInput"
+    matInput
+    placeholder="Nachname"
+    autocomplete="off"
+    formControlName="nachname"
+  />
+  <mat-hint>Bitte den Nachnamen eingeben</mat-hint>
+</mat-form-field>

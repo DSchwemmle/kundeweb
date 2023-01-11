@@ -15,11 +15,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- Eigene Komponente fuer die Navigationsleiste -->
-<hs-header></hs-header>
+<!-- --ggf. Sweetalert2 https://github.com/sweetalert2/sweetalert2 -->
 
-<!-- Eigene Komponente fuer den Haupteil: austauschbar durch Routing -->
-<hs-main></hs-main>
-
-<!-- Eigene Komponente fuer die Fussleiste -->
-<hs-footer></hs-footer>
+<div class="text-danger" aria-label="Fehler" *ngIf="text">
+  <i class="material-icons">error</i>
+  <span class="fw-bold ms-1">{{ text }}</span>
+</div>

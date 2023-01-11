@@ -1,0 +1,18 @@
+<mat-form-field
+  appearance="outline"
+  class="userInputField"
+  [formGroup]="createForm"
+>
+  <mat-label for="emailInput">Email</mat-label>
+  <input
+    id="emailInput"
+    matInput
+    placeholder="ex. test@mail.com"
+    autocomplete="off"
+    [class.is-invalid]="email.invalid && email.touched"
+    [class.is-valid]="email.valid && email.touched"
+    minlength="2"
+    formControlName="email"
+  />
+  <mat-hint>Bitte die Email eingeben</mat-hint>
+</mat-form-field>
