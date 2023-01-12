@@ -15,12 +15,12 @@
 
 ' Preview durch <Alt>d
 
-@startuml CreateBuecher
+@startuml CreateKunden
 
 'top to bottom direction
 
-rectangle CreateBuecher
-rectangle CreateTitel
+rectangle CreateKunden
+rectangle CreateKategorie
 rectangle CreateVerlag
 rectangle CreateIsbn
 

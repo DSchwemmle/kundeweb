@@ -23,12 +23,12 @@ start
 
 :Suchformular;
 -> Suchkriterien;
-:SucheBuecher;
--> Liste gefundener Buecher;
+:SucheKunden;
+-> Liste gefundener Kunden;
 :Suchergebnis;
 
 if (mind. 1 Kunde gefunden?) then (ja)
-  :GefundeneBuecher;
+  :GefundeneKunden;
 else (nein)
   :ErrorMessage;
 endif
