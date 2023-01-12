@@ -1,17 +1,16 @@
-<mat-form-field
-  appearance="outline"
-  class="userInputField"
-  [formGroup]="createForm"
->
-  <mat-label for="waehrungInput">Währung</mat-label>
-  <input
+<mat-form-field appearance="fill" [formGroup]="form">
+  <mat-label>Waehrung</mat-label>
+  <mat-select
     id="waehrungInput"
-    matInput
-    placeholder="ex. EUR"
-    autocomplete="off"
+    formControlName="waehrung"
     [class.is-invalid]="waehrung.invalid && waehrung.touched"
     [class.is-valid]="waehrung.valid && waehrung.touched"
-    formControlName="waehrung"
-  />
-  <mat-hint>Bitte den Währung eingeben</mat-hint>
+    required
+    disableRipple
+  >
+    <mat-option value="EUR">EUR</mat-option>
+    <mat-option value="USD">USD</mat-option>
+    <mat-option value="CHF">CHF</mat-option>
+    <mat-option value="GBP">GBP</mat-option>
+  </mat-select>
 </mat-form-field>

@@ -16,20 +16,19 @@
  */
 
 import { Component } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import log from 'loglevel';
 
 @Component({
     selector: 'hs-home',
     templateUrl: './home.component.html',
+    imports: [MatCardModule, MatDividerModule, MatProgressBarModule],
     standalone: true,
-    styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
-    constructor(private readonly title: Title) {
+export class HomeComponent {
+    constructor() {
         log.debug('HomeComponent.constructor()');
-    }
-
-    ngOnInit() {
-        this.title.setTitle('Homepage');
     }
 }

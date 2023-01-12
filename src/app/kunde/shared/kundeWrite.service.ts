@@ -21,15 +21,17 @@ import {
     type HttpErrorResponse,
     HttpHeaders,
     HttpResponse,
-    // eslint-disable-next-line import/no-unresolved
 } from '@angular/common/http';
-import { type Kunde, type User } from './kunde';
 import { type Observable, of } from 'rxjs';
 import { RemoveError, SaveError, UpdateError } from './errors';
 import { catchError, first, map } from 'rxjs/operators';
+import { AuthService } from '../../auth/auth.service'; // eslint-disable-line @typescript-eslint/consistent-type-imports
 import { Injectable } from '@angular/core';
+import { type Kunde } from './kunde';
+import { type User } from './user';
 import log from 'loglevel';
-import { paths } from '../../shared';
+import { paths } from '../../shared/paths';
+import { toServerObject } from './kundeServer';
 
 // Methoden der Klasse HttpClient
 //  * get(url, options) – HTTP GET request
@@ -45,50 +47,48 @@ import { paths } from '../../shared';
 // Die Anwendungslogik wird vom Controller an Service-Klassen delegiert.
 
 /**
- * Die Service-Klasse zu B&uuml;cher wird zum "Root Application Injector"
+ * Die Service-Klasse zu Kunden wird zum "Root Application Injector"
  * hinzugefuegt und ist in allen Klassen der Webanwendung verfuegbar.
  */
 @Injectable({ providedIn: 'root' })
 export class KundeWriteService {
-    readonly #baseUrl = paths.api;
+    readonly #baseUrl = paths.base;
 
     /**
      * @param httpClient injizierter Service HttpClient (von Angular)
      * @return void
      */
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(
+        private readonly httpClient: HttpClient,
+        private readonly authService: AuthService,
+    ) {
         log.debug('KundeWriteService.constructor: baseUrl=', this.#baseUrl);
     }
 
     /**
      * Einen neuen Kunden anlegen
-     * @param neuerKunde Das JSON-Objekt mit dem neuen Kunde
+     * @param neuerKunde Das JSON-Objekt mit dem neuen Kunden
      */
-    save(kunde: Kunde): Observable<SaveError | string> {
+    save(kunde: Kunde, user: User): Observable<SaveError | string> {
+        log.debug('KundeWriteService.save: kunde=', kunde, 'user=', user);
         log.debug('KundeWriteService.save: kunde=', kunde);
+
+        const authorizationStr = `${this.authService.authorization}`;
+        log.debug(
+            'KundeWriteService.save: authorizationStr=',
+            authorizationStr,
+        );
 
         /* eslint-disable @typescript-eslint/naming-convention */
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
-            Accept: 'text/plain',
+            Authorization: authorizationStr,
+            Accept: 'application/json',
         });
         /* eslint-enable @typescript-eslint/naming-convention */
 
-        const user: User = {
-            username: 'test',
-            password: 'Pass1234',
-        };
-
-        const customBody = {
-            kunde,
-            user,
-        };
-
-        const json = JSON.stringify(customBody);
-        log.debug('JSON = ', json);
-
         return this.httpClient
-            .post(this.#baseUrl, json, {
+            .post(this.#baseUrl, toServerObject(kunde, user), {
                 headers,
                 observe: 'response',
                 responseType: 'text',
@@ -131,14 +131,14 @@ export class KundeWriteService {
     }
 
     /**
-     * Ein vorhandenes Kunde aktualisieren
-     * @param kunde Das JSON-Objekt mit den aktualisierten Kundedaten
+     * Einen vorhandenen Kunden aktualisieren
+     * @param kunde Das JSON-Objekt mit den aktualisierten Kundendaten
      */
     update(kunde: Kunde): Observable<Kunde | UpdateError> {
         log.debug('KundeWriteService.update: kunde=', kunde);
 
-        // id, version und interessen gehoeren nicht zu den serverseitigen Nutzdaten
-        const { id, version, ...kundeDTO } = kunde;
+        // id, version und schlagwoerter gehoeren nicht zu den serverseitigen Nutzdaten
+        const { id, version, interessen, ...kundeDTO } = kunde; // eslint-disable-line @typescript-eslint/no-unused-vars
         if (version === undefined) {
             const msg = `Keine Versionsnummer fuer den Kunden ${id}`;
             log.debug(msg);
@@ -146,11 +146,19 @@ export class KundeWriteService {
         }
 
         const url = `${this.#baseUrl}/${id}`;
+
+        const authorizationStr = `${this.authService.authorization}`;
+        log.debug(
+            'KundeWriteService.update: authorizationStr=',
+            authorizationStr,
+        );
+
         /* eslint-disable @typescript-eslint/naming-convention */
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
-            Accept: 'text/plain',
             'If-Match': `"${version}"`,
+            Authorization: authorizationStr,
+            Accept: 'text/plain',
         });
         /* eslint-enable @typescript-eslint/naming-convention */
         log.debug('KundeWriteService.update: headers=', headers);
@@ -173,7 +181,6 @@ export class KundeWriteService {
                     if (versionOderError instanceof UpdateError) {
                         return versionOderError;
                     }
-                    log.debug('blabla', kundeDTO);
                     kunde.version = versionOderError;
                     return kunde;
                 }),
@@ -201,14 +208,27 @@ export class KundeWriteService {
     }
 
     /**
-     * Ein Kunde l&ouml;schen
-     * @param kunde Das JSON-Objekt mit dem zu loeschenden Kunde
+     * Einen Kunden l&ouml;schen
+     * @param kunde Das JSON-Objekt mit dem zu loeschenden Kunden
      */
     remove(kunde: Kunde): Observable<Record<string, unknown> | RemoveError> {
         log.debug('KundeWriteService.remove: kunde=', kunde);
         const url = `${this.#baseUrl}/${kunde.id}`;
 
-        return this.httpClient.delete(url).pipe(
+        const authorizationStr = `${this.authService.authorization}`;
+        log.debug(
+            'KundeWriteService.remove: authorizationStr=',
+            authorizationStr,
+        );
+
+        /* eslint-disable @typescript-eslint/naming-convention */
+        const headers = new HttpHeaders({
+            Authorization: authorizationStr,
+            Accept: 'text/plain',
+        });
+        /* eslint-enable @typescript-eslint/naming-convention */
+
+        return this.httpClient.delete(url, { headers }).pipe(
             first(),
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             catchError((err: unknown, _$) => {

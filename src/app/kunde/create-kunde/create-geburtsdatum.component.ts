@@ -1,49 +1,45 @@
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import { Component, Input, type OnInit } from '@angular/core';
-import { FormControl, type FormGroup, Validators } from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import {
+    FormControl,
+    type FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
+import { NgIf } from '@angular/common';
 import log from 'loglevel';
 
-/**
- * Komponente mit dem Tag &lt;hs-create-art&gt;, um das Erfassungsformular
- * f&uuml;r ein neues Buch zu realisieren.
- */
 @Component({
     selector: 'hs-create-geburtsdatum',
     templateUrl: './create-geburtsdatum.component.html',
-    styleUrls: ['./create-kunde.component.scss'],
+    imports: [
+        FormsModule,
+        MatDatepickerModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatNativeDateModule,
+        NgIf,
+        ReactiveFormsModule,
+    ],
+    standalone: true,
 })
-export class CreateGeburtsdatumComponent implements OnInit {
+export class CreateGeburtsdatumComponent {
     @Input()
-    createForm!: FormGroup;
+    form!: FormGroup;
 
-    readonly yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+    protected readonly today = new Date();
 
-    readonly geburtsdatum = new FormControl(undefined, [Validators.required]);
+    protected readonly geburtsdatum = new FormControl(Validators.required);
 
+    // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
     ngOnInit() {
         log.debug('CreateGeburtsdatumComponent.ngOnInit');
-        // siehe formControlName innerhalb @Component({templateUrl: ...})
-        this.createForm.addControl('geburtsdatum', this.geburtsdatum);
-    }
-
-    dayClicked({ date }: { date: Date }): void {
-        log.debug('CreateGeburtsdatumComponent: dayClicked', date);
-        this.createForm.setControl('geburtsdatum', new FormControl(date));
+        this.form.addControl('geburtsdatum', this.geburtsdatum);
     }
 }

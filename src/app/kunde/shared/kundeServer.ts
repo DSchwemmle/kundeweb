@@ -1,11 +1,22 @@
-import type {
-    FamilienstandType,
-    GeschlechtType,
-    Kunde,
-    KundeShared,
-    Umsatz
-} from './kunde';
+/*
+ * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+import { type Kunde, type KundeShared, type UmsatzType } from './kunde';
 import { Temporal } from '@js-temporal/polyfill';
+import { type User } from './user';
 import log from 'loglevel';
 
 interface Link {
@@ -22,12 +33,9 @@ interface Link {
  * </ul>
  */
 export interface KundeServer extends KundeShared {
+    umsatz: UmsatzType;
     geburtsdatum?: string;
-    geschlecht?: GeschlechtType;
     interessen?: string[];
-    homepage?: string;
-    umsatz?: Umsatz;
-    familienstand?: FamilienstandType;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     _links?: {
         self: Link;
@@ -36,6 +44,16 @@ export interface KundeServer extends KundeShared {
         update?: Link;
         remove?: Link;
     };
+}
+
+export interface UserServer {
+    username: string;
+    password: string;
+}
+
+export interface ObjectServer {
+    kunde: KundeServer;
+    user: UserServer;
 }
 
 /**
@@ -53,7 +71,7 @@ export const toKunde = (kundeServer: KundeServer, etag?: string) => {
         selfLink = self.href;
     }
 
-    let id: string | undefined;
+    let id = 'N/A';
     if (selfLink !== undefined) {
         const lastSlash = selfLink.lastIndexOf('/');
         id = selfLink.slice(lastSlash + 1);
@@ -71,17 +89,16 @@ export const toKunde = (kundeServer: KundeServer, etag?: string) => {
         email,
         kategorie,
         hasNewsletter,
-        geschlecht,
         geburtsdatum,
-        adresse,
         homepage,
+        geschlecht,
         familienstand,
-        umsatz,
         interessen,
+        umsatz,
+        adresse,
     } = kundeServer;
 
     let datumTemporal: Temporal.PlainDate | undefined;
-    // TODO Parsing, ob der Datum-String valide ist
     if (geburtsdatum !== undefined) {
         const [yearStr, monthStr, dayStr] = geburtsdatum
             .replace(/T.*/gu, '')
@@ -98,13 +115,13 @@ export const toKunde = (kundeServer: KundeServer, etag?: string) => {
         email,
         kategorie,
         hasNewsletter,
-        geschlecht,
         geburtsdatum: datumTemporal,
-        adresse,
         homepage,
+        geschlecht,
         familienstand,
+        interessen: interessen ?? [],
         umsatz,
-        interessen,
+        adresse,
         version,
     };
     log.debug('Kunde.fromServer: kunde=', kunde);
@@ -112,7 +129,7 @@ export const toKunde = (kundeServer: KundeServer, etag?: string) => {
 };
 
 /**
- * Konvertierung des Kundeobjektes in ein JSON-Objekt f&uuml;r den RESTful
+ * Konvertierung des Kundenobjektes in ein JSON-Objekt f&uuml;r den RESTful
  * Web Service.
  * @return Das JSON-Objekt f&uuml;r den RESTful Web Service
  */
@@ -126,12 +143,37 @@ export const toKundeServer = (kunde: Kunde): KundeServer => {
         email: kunde.email,
         kategorie: kunde.kategorie,
         hasNewsletter: kunde.hasNewsletter,
-        geschlecht: kunde.geschlecht,
         geburtsdatum,
-        adresse: kunde.adresse,
         homepage: kunde.homepage,
+        geschlecht: kunde.geschlecht,
         familienstand: kunde.familienstand,
-        umsatz: kunde.umsatz,
         interessen: kunde.interessen,
+        umsatz: kunde.umsatz,
+        adresse: kunde.adresse,
+    };
+};
+
+/**
+ * Konvertierung des Userobjektes in ein JSON-Objekt f&uuml;r den RESTful
+ * Web Service.
+ * @return Das JSON-Objekt f&uuml;r den RESTful Web Service
+ */
+export const toUserServer = (user: User): UserServer => ({
+    username: user.username,
+    password: user.password,
+});
+
+/**
+ * Zusammenbauen der Objekte f&uuml;r einen Create-Objekt auf dem App-Server.
+ * @param kunde Kunden-Objekt
+ * @param user User-Objekt
+ * @returns Server-Objekt als JSON-Array f&uuml;r den RESTful Web Service
+ */
+export const toServerObject = (kunde: Kunde, user: User): ObjectServer => {
+    const kundeServer = toKundeServer(kunde);
+    const userServer = toUserServer(user);
+    return {
+        kunde: kundeServer,
+        user: userServer,
     };
 };

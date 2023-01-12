@@ -14,32 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { Familienstand, GeschlechtType, type Kunde } from './kunde';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import {
+    type FamilienstandType,
+    type GeschlechtType,
+    type Kunde,
+} from './kunde';
+import { type KundeServer, toKunde } from './kundeServer';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports, sort-imports
 import {
     HttpClient,
     type HttpErrorResponse,
     HttpParams,
     type HttpResponse,
-    // eslint-disable-next-line import/no-unresolved
 } from '@angular/common/http';
-import { type KundeServer, toKunde } from './kundeServer';
 import { type Observable, of } from 'rxjs';
 import { catchError, first, map } from 'rxjs/operators';
 import { FindError } from './errors';
 import { Injectable } from '@angular/core';
 import log from 'loglevel';
-import { paths } from '../../shared';
+import { paths } from '../../shared/paths';
 
 export interface Suchkriterien {
     nachname: string;
-    geschlechtType: GeschlechtType | '';
-    familienstand: Familienstand | '';
-    interessen: { sport: boolean; lesen: boolean; reisen: boolean };
+    familienstand: FamilienstandType | '';
+    geschlecht: GeschlechtType | '';
+    interessen: { lesen: boolean; reisen: boolean; sport: boolean };
 }
-
-// Todo: Suchkriterien wurden noch nicht eingefügt.
 
 export interface KundenServer {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -67,12 +67,12 @@ export interface KundenServer {
 // https://angular.io/guide/singleton-services
 
 /**
- * Die Service-Klasse zu B&uuml;cher wird zum "Root Application Injector"
+ * Die Service-Klasse zu Kunden wird zum "Root Application Injector"
  * hinzugefuegt und ist in allen Klassen der Webanwendung verfuegbar.
  */
 @Injectable({ providedIn: 'root' })
 export class KundeReadService {
-    readonly #baseUrl = paths.api;
+    readonly #baseUrl = paths.base;
 
     /**
      * @param httpClient injizierter Service HttpClient (von Angular)
@@ -90,26 +90,41 @@ export class KundeReadService {
     find(
         suchkriterien: Suchkriterien | undefined = undefined, // eslint-disable-line unicorn/no-useless-undefined
     ): Observable<FindError | Kunde[]> {
-        log.debug('KundeService.find(): suchkriterien=', suchkriterien);
-        const params = this.suchkriterienToHttpParams(suchkriterien);
-        const url = this.#baseUrl;
-        log.debug(`KundeService.find(): url=${url}`);
+        log.debug('KundeReadService.find: suchkriterien=', suchkriterien);
+        log.debug('KundeReadService.find: url=', this.#baseUrl);
+
+        const params = this.#suchkriterienToHttpParams(suchkriterien);
+
+        // Promise:
+        // - Einzelner Wert
+        // - Kein Cancel
+        //
+        // Observable aus RxJS:
+        // - die Werte werden "lazy" in einem Stream bereitgestellt
+        // - Operatoren: map, forEach, filter, ...
+        // - Ausfuehrung nur dann, wenn es einen Aufruf von subscribe() gibt
+        // - firstValueFrom() konvertiert den ersten Wert in ein Promise
+        // - Cancel ist moeglich
+        // https://stackoverflow.com/questions/37364973/what-is-the-difference-between-promises-and-observables
 
         return (
             this.httpClient
-                .get<KundenServer>(url, { params })
+                .get<KundenServer>(this.#baseUrl, { params })
 
-                // Observable: mehrere Werte werden "lazy" bereitgestellt, statt in einem JSON-Array
                 // pipe ist eine "pure" Funktion, die ein Observable in ein NEUES Observable transformiert
                 .pipe(
+                    // 1 Datensatz empfangen und danach implizites "unsubscribe"
+                    // entspricht take(1)
                     first(),
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    catchError((err: unknown, _$) =>
-                        of(this.#buildFindError(err as HttpErrorResponse)),
+
+                    catchError(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        (err: unknown, _$) =>
+                            of(this.#buildFindError(err as HttpErrorResponse)),
                     ),
 
-                    // entweder Observable<KundeServer[]> oder Observable<FindError>
-                    map(result => this.#toKundeArrayOrError(result)),
+                    // entweder Observable<KundenServer> oder Observable<FindError>
+                    map(restResult => this.#toKundeArrayOrError(restResult)),
                 )
         );
 
@@ -119,9 +134,28 @@ export class KundeReadService {
         // Falls benoetigt, gibt es in Angular dafuer den Service Jsonp.
     }
 
+    #toKundeArrayOrError(
+        restResult: FindError | KundenServer,
+    ): FindError | Kunde[] {
+        log.debug(
+            'KundeReadService.#toKundeArrayOrError: restResult=',
+            restResult,
+        );
+        if (restResult instanceof FindError) {
+            return restResult;
+        }
+
+        // eslint-disable-next-line no-underscore-dangle
+        const kunden = restResult._embedded.kunden.map(kundeServer =>
+            toKunde(kundeServer),
+        );
+        log.debug('KundeReadService.#toKundeArrayOrError: kunden=', kunden);
+        return kunden;
+    }
+
     /**
-     * Ein Kunde anhand der ID suchen
-     * @param id Die ID des gesuchten Kundes
+     * Einen Kunden anhand der ID suchen
+     * @param id Die ID des gesuchten Kunden
      */
     findById(id: string | undefined): Observable<FindError | Kunde> {
         log.debug('KundeReadService.findById: id=', id);
@@ -158,18 +192,6 @@ export class KundeReadService {
         );
     }
 
-    #toKundeArrayOrError(res: FindError | KundenServer): FindError | Kunde[] {
-        if (res instanceof FindError) {
-            return res;
-        }
-        // eslint-disable-next-line no-underscore-dangle
-        const kunden = res._embedded.kunden.map(kundeServer =>
-            toKunde(kundeServer),
-        );
-        log.debug('KundeService.mapFindResult(): kunden=', kunden);
-        return kunden;
-    }
-
     #toKundeOrError(
         restResult: FindError | HttpResponse<KundeServer>,
     ): FindError | Kunde {
@@ -185,8 +207,7 @@ export class KundeReadService {
         const etag = headers.get('ETag') ?? undefined;
         log.debug('KundeReadService.#toKundeOrError: etag=', etag);
 
-        const kunde = toKunde(body, etag);
-        return kunde;
+        return toKunde(body, etag);
     }
 
     /**
@@ -194,11 +215,11 @@ export class KundeReadService {
      * @param suchkriterien Suchkriterien fuer den GET-Request.
      * @return Parameter fuer den GET-Request
      */
-    private suchkriterienToHttpParams(
+    #suchkriterienToHttpParams(
         suchkriterien: Suchkriterien | undefined,
     ): HttpParams {
         log.debug(
-            'KundeService.suchkriterienToHttpParams(): suchkriterien=',
+            'KundeReadService.#suchkriterienToHttpParams: suchkriterien=',
             suchkriterien,
         );
         let httpParams = new HttpParams();
@@ -207,9 +228,9 @@ export class KundeReadService {
             return httpParams;
         }
 
-        const { nachname, geschlechtType, familienstand, interessen } =
+        const { nachname, familienstand, geschlecht, interessen } =
             suchkriterien;
-        const { sport, lesen, reisen } = interessen;
+        const { lesen, reisen, sport } = interessen;
 
         if (nachname !== '') {
             httpParams = httpParams.set('nachname', nachname);
@@ -217,17 +238,17 @@ export class KundeReadService {
         if (familienstand !== '') {
             httpParams = httpParams.set('familienstand', familienstand);
         }
-        if (geschlechtType !== '') {
-            httpParams = httpParams.set('geschlecht', geschlechtType);
-        }
-        if (sport) {
-            httpParams = httpParams.set('interesse', 'S');
+        if (geschlecht !== '') {
+            httpParams = httpParams.set('geschlecht', geschlecht);
         }
         if (lesen) {
             httpParams = httpParams.set('interesse', 'L');
         }
         if (reisen) {
             httpParams = httpParams.set('interesse', 'R');
+        }
+        if (sport) {
+            httpParams = httpParams.set('interesse', 'S');
         }
         return httpParams;
     }

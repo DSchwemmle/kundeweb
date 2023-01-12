@@ -1,14 +1,16 @@
-<mat-form-field
-  appearance="outline"
-  class="userInputField"
-  [formGroup]="createForm"
->
+<mat-form-field appearance="fill" [formGroup]="form">
   <mat-label>Familienstand</mat-label>
-  <mat-select formControlName="familienstand">
+  <mat-select
+    id="familienstandInput"
+    formControlName="familienstand"
+    [class.is-invalid]="familienstand.invalid && familienstand.touched"
+    [class.is-valid]="familienstand.valid && familienstand.touched"
+    required
+    disableRipple
+  >
     <mat-option value="L">Ledig</mat-option>
-    <mat-option value="VH">Verheiratet</mat-option>
     <mat-option value="G">Geschieden</mat-option>
+    <mat-option value="VH">Verheiratet</mat-option>
     <mat-option value="VW">Verwitwet</mat-option>
   </mat-select>
-  <mat-hint>Bitte Familienstand auswählen</mat-hint>
 </mat-form-field>

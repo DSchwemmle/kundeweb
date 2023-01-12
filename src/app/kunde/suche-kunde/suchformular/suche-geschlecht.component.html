@@ -1,0 +1,10 @@
+<div class="row">
+  <mat-label class="col col-2 col-form-label gy-3">Geschlecht</mat-label>
+  <div class="col col-10 gy-3">
+    <mat-radio-group [(ngModel)]="geschlecht" (change)="onChange($event)">
+      <mat-radio-button value="M">Männlich</mat-radio-button>
+      <mat-radio-button value="W">Weiblich</mat-radio-button>
+      <mat-radio-button value="D">Divers</mat-radio-button>
+    </mat-radio-group>
+  </div>
+</div>

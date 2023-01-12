@@ -1,43 +1,39 @@
-<div class="box-create">
-  <mat-grid-list cols="1" rowHeight="100px">
+<section class="card" [@fadeIn]="'in'">
+  <mat-card-header color="primary">
+    <mat-icon>search</mat-icon>
+    <span class="ms-1 fw-bold"> Eingabe der Suchkriterien </span>
+  </mat-card-header>
+  <mat-card-content>
     <form (submit)="onSubmit()" role="form">
-      <mat-grid-tile><h2>Eingabe der Suchkriterien</h2></mat-grid-tile>
-      <mat-grid-tile>
-        <hs-suche-nachname
-          (nachname$)="setNachname($event)"
-          class="element-create"
-        ></hs-suche-nachname>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <hs-suche-familienstand
-          (familienstand$)="setFamilienstand($event)"
-          class="element-create"
-        ></hs-suche-familienstand>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <hs-suche-geschlechttype
-          (geschlechtType$)="setGeschlechtType($event)"
-          class="element-create"
-        ></hs-suche-geschlechttype>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <hs-suche-interessen
-          (sport$)="setSport($event)"
-          (lesen$)="setLesen($event)"
-          (reisen$)="setReisen($event)"
-          class="element-create"
-        >
-        </hs-suche-interessen>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <button
-          mat-raised-button
-          color="primary"
-          matTooltip="Hier drücken für die Suche"
-        >
-          Suche
-        </button>
-      </mat-grid-tile>
+      <hs-suche-nachname (nachname$)="setNachname($event)"></hs-suche-nachname>
+      <hs-suche-familienstand
+        (familienstand$)="setFamilienstand($event)"
+      ></hs-suche-familienstand>
+      <hs-suche-geschlecht
+        (geschlecht$)="setGeschlecht($event)"
+      ></hs-suche-geschlecht>
+      <hs-suche-interessen
+        (sport$)="setSport($event)"
+        (lesen$)="setLesen($event)"
+        (reisen$)="setReisen($event)"
+      >
+      </hs-suche-interessen>
+
+      <div class="row">
+        <div class="col offset-2 gy-3">
+          <mat-icon>info</mat-icon>
+          <span class="ms-1"> Hinweis: Keine Eingabe liefert alle Kunden </span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col offset-2 gy-3">
+          <button type="submit" mat-raised-button color="primary">
+            <mat-icon color="white">search</mat-icon>
+            <button mat-button color="white">Suchen</button>
+          </button>
+        </div>
+      </div>
     </form>
-  </mat-grid-list>
-</div>
+  </mat-card-content>
+</section>

@@ -1,42 +1,41 @@
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 import { Component, Input, type OnInit } from '@angular/core';
-import { FormControl, type FormGroup } from '@angular/forms';
+import {
+    FormControl,
+    type FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { NgIf } from '@angular/common';
 import log from 'loglevel';
 
 /**
- * Komponente mit dem Tag &lt;hs-create-art&gt;, um das Erfassungsformular
- * f&uuml;r ein neues Buch zu realisieren.
+ * Komponente f&uuml;r den CSS-Selektor &lt;hs-create-familienstand&gt;, um Erfassungsformular f&uuml;r einen neuen Kunden zu realisieren.
  */
 @Component({
     selector: 'hs-create-familienstand',
     templateUrl: './create-familienstand.component.html',
-    styleUrls: ['./create-kunde.component.scss'],
+    imports: [
+        FormsModule,
+        MatIconModule,
+        MatInputModule,
+        MatSelectModule,
+        NgIf,
+        ReactiveFormsModule,
+    ],
+    standalone: true,
 })
 export class CreateFamilienstandComponent implements OnInit {
     @Input()
-    createForm!: FormGroup;
+    form!: FormGroup;
 
-    readonly familienstand = new FormControl(undefined);
+    familienstand = new FormControl(Validators.required);
 
     ngOnInit() {
         log.debug('CreateFamilienstandComponent.ngOnInit');
-        // siehe formControlName innerhalb @Component({templateUrl: ...})
-        this.createForm.addControl('familienstand', this.familienstand);
+        this.form.addControl('familienstand', this.familienstand);
     }
 }

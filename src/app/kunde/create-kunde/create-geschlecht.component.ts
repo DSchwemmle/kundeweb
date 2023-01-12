@@ -1,42 +1,31 @@
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 import { Component, Input, type OnInit } from '@angular/core';
-import { FormControl, type FormGroup } from '@angular/forms';
+import {
+    FormControl,
+    type FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+} from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import log from 'loglevel';
 
 /**
- * Komponente mit dem Tag &lt;hs-create-art&gt;, um das Erfassungsformular
- * f&uuml;r ein neues Buch zu realisieren.
+ * Komponente f&uuml;r den CSS-Selektor &lt;hs-create-geschlecht&gt;, um Erfassungsformular f&uuml;r einen neuen Kunden zu realisieren.
  */
 @Component({
     selector: 'hs-create-geschlecht',
     templateUrl: './create-geschlecht.component.html',
-    styleUrls: ['./create-kunde.component.scss'],
+    imports: [FormsModule, MatInputModule, MatRadioModule, ReactiveFormsModule],
+    standalone: true,
 })
 export class CreateGeschlechtComponent implements OnInit {
     @Input()
-    createForm!: FormGroup;
+    form!: FormGroup;
 
-    readonly geschlecht = new FormControl(undefined);
+    geschlecht = new FormControl('D');
 
     ngOnInit() {
         log.debug('CreateGeschlechtComponent.ngOnInit');
-        // siehe formControlName innerhalb @Component({templateUrl: ...})
-        this.createForm.addControl('geschlecht', this.geschlecht);
+        this.form.addControl('geschlecht', this.geschlecht);
     }
 }

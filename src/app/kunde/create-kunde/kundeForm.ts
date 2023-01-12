@@ -1,91 +1,87 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable max-lines-per-function */
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 import {
-    type Adresse,
-    type Familienstand,
-    type GeschlechtType,
     type Kunde,
     type KundeShared,
-    type Umsatz,
-} from '../shared';
+    type WaehrungType,
+} from '../shared/kunde';
 import { Temporal } from '@js-temporal/polyfill';
+import type { User } from '../shared/user';
+
 import log from 'loglevel';
 
 /**
  * Daten aus einem Formular:
- * <ul>
- *  <li> je 1 Control fuer jede Checkbox und
- *  <li> au&szlig;erdem Strings f&uuml;r Eingabefelder f&uuml;r Zahlen.
- * </ul>
+ * - je 1 Control fuer jede Checkbox und
+ * - außerdem Strings für Eingabefelder für Zahlen.
  */
 export interface KundeForm extends KundeShared {
-    adresse: Adresse;
-    geschlecht: GeschlechtType;
     geburtsdatum: Date;
-    homepage: string;
-    familienstand: Familienstand;
-    // interessen: Set<InteresseType>;
+    betrag: number;
+    waehrung: WaehrungType;
     plz: string;
     ort: string;
-    betrag: bigint;
-    // Technically not string, change later.
-    waehrung: string;
     sport: boolean;
-    reisen: boolean;
     lesen: boolean;
+    reisen: boolean;
 }
 
 /**
- * Ein Kunde-Objekt mit JSON-Daten erzeugen, die von einem Formular kommen.
- * @param kunde JSON-Objekt mit Daten vom Formular
+ * Daten aus einem Formular für den User
+ */
+export interface UserForm {
+    username: string;
+    password: string;
+}
+
+/**
+ * Ein User-Objekt mit Json-Objekt aus einem Formular erzeugen
+ * @param userForm Json-Objekt mit Daten aus dem Formular
+ * @returns Das initialisierte User-Objekt
+ */
+export const toUser = (userForm: UserForm): User => {
+    log.debug('toUser: userForm=', userForm);
+
+    const { username, password } = userForm;
+
+    const user: User = {
+        username,
+        password,
+    };
+    log.debug('toUser: user=', user);
+    return user;
+};
+
+/**
+ * Ein Kunde-Objekt mit JSON-Objekt aus einem Formular erzeugen
+ * @param kundeForm JSON-Objekt mit Daten aus dem Formular
  * @return Das initialisierte Kunde-Objekt
  */
-export const toKunde = (kundeForm: KundeForm) => {
+// eslint-disable-next-line max-lines-per-function
+export const toKunde = (kundeForm: KundeForm): Kunde => {
     log.debug('toKunde: kundeForm=', kundeForm);
 
     const {
         nachname,
         email,
         kategorie,
-        newsletter,
-        geschlecht,
+        hasNewsletter,
         geburtsdatum,
         homepage,
+        geschlecht,
         familienstand,
-        plz,
-        ort,
+        sport,
+        lesen,
+        reisen,
         betrag,
         waehrung,
-        sport,
-        reisen,
-        lesen,
+        plz,
+        ort,
     } = kundeForm;
 
-    const adresse: Adresse = {
-        plz,
-        ort,
-    };
-
-    const umsatz: Umsatz = {
-        betrag,
-        waehrung,
-    };
+    const geburtsdatumTemporal = new Temporal.PlainDate(
+        geburtsdatum.getFullYear(),
+        geburtsdatum.getMonth() + 1,
+        geburtsdatum.getDate(),
+    );
 
     const interessen: string[] = [];
     if (sport) {
@@ -98,26 +94,27 @@ export const toKunde = (kundeForm: KundeForm) => {
         interessen.push('R');
     }
 
-    const datumTemporal = new Temporal.PlainDate(
-        geburtsdatum.getFullYear(),
-        geburtsdatum.getMonth() + 1,
-        geburtsdatum.getDate(),
-    );
-    // TODO Somehow the datumTemporal gets overwritten with the current date before being passed on as kunde.
-    log.debug('toKunde: datumTemporal=', datumTemporal);
-
     const kunde: Kunde = {
+        id: undefined,
         nachname,
         email,
         kategorie,
-        newsletter,
-        geschlecht,
-        geburtsdatum: datumTemporal,
-        adresse,
+        hasNewsletter,
+        geburtsdatum: geburtsdatumTemporal,
         homepage,
+        geschlecht,
         familienstand,
-        umsatz,
         interessen,
+        umsatz: {
+            id: undefined,
+            betrag,
+            waehrung,
+        },
+        adresse: {
+            id: undefined,
+            plz,
+            ort,
+        },
         version: 0,
     };
     log.debug('toKunde: kunde=', kunde);

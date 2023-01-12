@@ -1,53 +1,43 @@
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 import { Component, Input, type OnInit } from '@angular/core';
-import { FormControl, type FormGroup, Validators } from '@angular/forms';
+import {
+    FormControl,
+    type FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
+import { HOMEPAGE_REGEX } from '../shared/kunde';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { NgIf } from '@angular/common';
 import log from 'loglevel';
 
 /**
- * Komponente mit dem Tag "hs-create-homepage", um das Erfassungsformular
- * für einen neuen Kunden zu realisieren.
+ * Komponente f&uuml;r den CSS-Selektor &lt;hs-create-homepage&gt;, um Erfassungsformular f&uuml;r einen neuen Kunden zu realisieren.
  */
 @Component({
-    // moduleId: module.id,
     selector: 'hs-create-homepage',
     templateUrl: './create-homepage.component.html',
-    styleUrls: ['./create-kunde.component.scss'],
+    imports: [
+        FormsModule,
+        MatIconModule,
+        MatInputModule,
+        NgIf,
+        ReactiveFormsModule,
+    ],
+    standalone: true,
 })
 export class CreateHomepageComponent implements OnInit {
-    private static readonly MIN_LENGTH = 2;
-
     @Input()
-    createForm!: FormGroup;
+    form!: FormGroup;
 
-    // Keine Vorbelegung bzw. der leere String, da es Placeholder gibt
-    // Varianten fuer Validierung:
-    //    serverseitig mittels Request/Response
-    //    clientseitig bei den Ereignissen keyup, change, blur, ...
-    // Ein Endbenutzer bewirkt staendig einen neuen Fehlerstatus
-    readonly homepage = new FormControl('', [
+    homepage = new FormControl(undefined, [
         Validators.required,
-        Validators.minLength(CreateHomepageComponent.MIN_LENGTH),
+        Validators.pattern(HOMEPAGE_REGEX),
     ]);
 
     ngOnInit() {
         log.debug('CreateHomepageComponent.ngOnInit');
-        // siehe formControlName innerhalb @Component({templateUrl: ...})
-        this.createForm.addControl('homepage', this.homepage);
+        this.form.addControl('homepage', this.homepage);
     }
 }

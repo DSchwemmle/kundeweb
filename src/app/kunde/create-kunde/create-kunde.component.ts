@@ -1,54 +1,74 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable import/no-unresolved */
-/*
- * Copyright (C) 2015 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import { Component, type OnInit } from '@angular/core';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { type KundeForm, toKunde } from './kundeForm';
-import { KundeWriteService, SaveError } from '../shared'; // eslint-disable-line @typescript-eslint/consistent-type-imports
+import { type KundeForm, type UserForm, toKunde, toUser } from './kundeForm';
 import { first, tap } from 'rxjs/operators';
-import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router'; // eslint-disable-line @typescript-eslint/consistent-type-imports
-import { Title } from '@angular/platform-browser'; // eslint-disable-line @typescript-eslint/consistent-type-imports
+import { Component } from '@angular/core';
+import { CreateBetragComponent } from './create-betrag.component';
+import { CreateEmailComponent } from './create-email.component';
+import { CreateFamilienstandComponent } from './create-familienstand.component';
+import { CreateGeburtsdatumComponent } from './create-geburtsdatum.component';
+import { CreateGeschlechtComponent } from './create-geschlecht.component';
+import { CreateHasNewsletterComponent } from './create-hasNewsletter.component';
+import { CreateHomepageComponent } from './create-homepage.component';
+import { CreateInteressenComponent } from './create-interessen.component';
+import { CreateKategorieComponent } from './create-kategorie.component';
+import { CreateNachnameComponent } from './create-nachname.component';
+import { CreateOrtComponent } from './create-ort.component';
+import { CreatePasswordComponent } from './create-password.component';
+import { CreatePlzComponent } from './create-plz.component';
+import { CreateUsernameComponent } from './create-username.component';
+import { CreateWaehrungComponent } from './create-waehrung.component';
+import { ErrorMessageComponent } from '../../shared/error-message.component';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { KundeWriteService } from '../shared/kundeWrite.service';
+import { MatIconModule } from '@angular/material/icon';
+import { NgIf } from '@angular/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { Router } from '@angular/router';
+import { SaveError } from '../shared/errors';
 import log from 'loglevel';
 
 /**
- * Komponente mit dem Tag "hs-create-kunde" um das Erfassungsformular
- * für einen neuen Kunde zu realisieren.
+ * Komponente mit dem CSS-Selektor &lt;hs-create-kunde&gt;, um Erfassungsformular f&uuml;r einen neuen Kunden zu realisieren.
  */
 @Component({
     selector: 'hs-create-kunde',
     templateUrl: './create-kunde.component.html',
-    styleUrls: ['./create-kunde.component.scss'],
+    imports: [
+        CreateBetragComponent,
+        CreateEmailComponent,
+        CreateFamilienstandComponent,
+        CreateGeburtsdatumComponent,
+        CreateGeschlechtComponent,
+        CreateHasNewsletterComponent,
+        CreateHomepageComponent,
+        CreateInteressenComponent,
+        CreateKategorieComponent,
+        CreateNachnameComponent,
+        CreateOrtComponent,
+        CreatePlzComponent,
+        CreatePasswordComponent,
+        CreateUsernameComponent,
+        CreateWaehrungComponent,
+        ErrorMessageComponent,
+        MatIconModule,
+        NgIf,
+        ReactiveFormsModule,
+    ],
+    standalone: true,
 })
-export class CreateKundeComponent implements OnInit {
-    readonly createForm = new FormGroup({});
+export class CreateKundeComponent {
+    protected readonly form = new FormGroup({});
 
     showWarning = false;
 
     fertig = false;
 
-    errorMsg: string | undefined = undefined;
+    protected errorMsg: string | undefined = undefined;
 
     constructor(
         private readonly service: KundeWriteService,
         private readonly router: Router,
-        private readonly titleService: Title,
     ) {
         log.debug(
             'CreateKundeComponent.constructor: Injizierter Router:',
@@ -56,45 +76,34 @@ export class CreateKundeComponent implements OnInit {
         );
     }
 
-    ngOnInit() {
-        this.titleService.setTitle('Neuer Kunde');
-    }
-
     /**
      * Die Methode <code>onSubmit</code> realisiert den Event-Handler, wenn das
-     * Formular abgeschickt wird, um einen neuen Kunde anzulegen.
-     * @return false, um das durch den Button-Klick ausgel&ouml;ste Ereignis
-     *         zu konsumieren.
+     * Formular abgeschickt wird, um einen neuen Kunden anzulegen.
      */
     onSubmit() {
-        // In einem Control oder in einer FormGroup gibt es u.a. folgende
-        // Properties
-        //    value     JSON-Objekt mit den IDs aus der FormGroup als
-        //              Schluessel und den zugehoerigen Werten
-        //    errors    Map<string,any> mit den Fehlern, z.B. {'required': true}
-        //    valid/invalid     fuer valide Werte
-        //    dirty/pristine    falls der Wert geaendert wurde
-
-        if (this.createForm.invalid) {
+        log.debug(this.form.value);
+        if (this.form.invalid) {
             log.debug(
                 'CreateKundeComponent.onSave: Validierungsfehler',
-                this.createForm,
+                this.form,
             );
+            return;
         }
 
-        const kundeForm = this.createForm.value as KundeForm;
+        const kundeForm = this.form.value as KundeForm;
+        const userForm = this.form.value as UserForm;
         const neuerKunde = toKunde(kundeForm);
         log.debug('CreateKundeComponent.onSave: neuerKunde=', neuerKunde);
+        const neuerUser = toUser(userForm);
+        log.debug('CreateKundeComponent.onSave: neuerUser=', neuerUser);
 
         this.service
-            .save(neuerKunde)
+            .save(neuerKunde, neuerUser)
             .pipe(
-                // 1. Datensatz empfangen und danach implizites "unsubscribe"
                 first(),
                 tap(result => this.#setProps(result)),
             )
-            // asynchrone Funktionen nur bei subscribe, nicht bei tap
-            .subscribe({ next: () => this.#navigateHome() });
+            .subscribe({ next: () => this.#navigateToHome() });
     }
 
     #setProps(result: SaveError | string) {
@@ -108,7 +117,7 @@ export class CreateKundeComponent implements OnInit {
         this.errorMsg = undefined;
 
         const id = result;
-        log.debug('CreateKundeComponent.#setProps: id=', id);
+        log.debug('CreateKundeComponent.onSave: id=', id);
     }
 
     #handleError(err: SaveError) {
@@ -121,7 +130,6 @@ export class CreateKundeComponent implements OnInit {
         switch (statuscode) {
             case HttpStatusCode.UnprocessableEntity: {
                 const { cause } = err;
-                // TODO Aufbereitung der Fehlermeldung: u.a. Anfuehrungszeichen
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 this.errorMsg =
                     cause instanceof HttpErrorResponse
@@ -130,25 +138,29 @@ export class CreateKundeComponent implements OnInit {
                 break;
             }
 
-            case HttpStatusCode.TooManyRequests:
+            case HttpStatusCode.TooManyRequests: {
                 this.errorMsg =
                     'Zu viele Anfragen. Bitte versuchen Sie es später noch einmal.';
                 break;
+            }
 
-            case HttpStatusCode.GatewayTimeout:
-                this.errorMsg = 'Ein interner Fehler ist aufgetreten.';
+            case HttpStatusCode.GatewayTimeout: {
+                this.errorMsg =
+                    'Der Server ist nicht erreichbar. Bitte versuchen Sie es später noch einmal.';
                 log.error('Laeuft der Appserver? Port-Forwarding?');
                 break;
+            }
 
-            default:
-                this.errorMsg = 'Ein unbekannter Fehler ist aufgetreten.';
+            default: {
+                this.errorMsg = 'Ein unbekannt Fehler ist aufgetreten.';
                 break;
+            }
         }
     }
 
-    async #navigateHome() {
+    async #navigateToHome() {
         if (this.errorMsg === undefined) {
-            log.debug('CreateKundeComponent.#navigateHome: Navigation');
+            log.debug('CreateKundeComponent.#navigateToHome: success');
             await this.router.navigate(['/']);
         }
     }

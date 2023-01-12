@@ -1,38 +1,57 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable import/no-unresolved */
 import { Component, Output } from '@angular/core';
-import type {
-    Familienstand,
-    GeschlechtType,
-    Suchkriterien,
-} from '../../shared';
+import {
+    type FamilienstandType,
+    type GeschlechtType,
+} from '../../shared/kunde';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
-import { fadeIn } from 'src/app/shared';
+import { SucheFamilienstandComponent } from './suche-familienstand.component';
+import { SucheGeschlechtComponent } from './suche-geschlecht.component';
+import { SucheInteressenComponent } from './suche-interessen.component';
+import { SucheNachnameComponent } from './suche-nachname.component';
+import { type Suchkriterien } from '../../shared/kundeRead.service';
+import { fadeIn } from '../../../shared/animations';
 import log from 'loglevel';
+
+/**
+ * Komponente f&uuml;r den CSS-Selektor <code>hs-suchformular</code>
+ */
 @Component({
     selector: 'hs-suchformular',
     templateUrl: './suchformular.component.html',
-    styleUrls: ['./suchformular.component.scss'],
     animations: [fadeIn],
+    imports: [
+        FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        SucheFamilienstandComponent,
+        SucheGeschlechtComponent,
+        SucheInteressenComponent,
+        SucheNachnameComponent,
+    ],
+    standalone: true,
 })
 export class SuchformularComponent {
     @Output()
-    readonly suchkriterien$ = new Subject<Suchkriterien>();
+    protected readonly suchkriterien$ = new Subject<Suchkriterien>();
 
     #nachname = '';
 
-    #geschlechtType: GeschlechtType | '' = '';
+    #familienstand: FamilienstandType | '' = '';
 
-    #familienstand: Familienstand | '' = '';
-
-    #reisen = false;
+    #geschlecht: GeschlechtType | '' = '';
 
     #sport = false;
 
     #lesen = false;
 
-    // DI: Constructor Injection (React hat uebrigens keine DI)
-    // Empfehlung: Konstruktor nur fuer DI
+    #reisen = false;
+
     constructor() {
         log.debug('SuchformularComponent.constructor()');
     }
@@ -42,14 +61,19 @@ export class SuchformularComponent {
         this.#nachname = nachname;
     }
 
-    setGeschlechtType(geschlechtType: GeschlechtType | '') {
-        log.debug('SuchformularComponent.setGeschlechtType', geschlechtType);
-        this.#geschlechtType = geschlechtType;
+    setFamilienstand(familienstand: string) {
+        log.debug('SuchformularComponent.setFamilienstand', familienstand);
+        this.#familienstand = familienstand as FamilienstandType;
     }
 
-    setFamilienstand(familienstand: Familienstand | '') {
-        log.debug('SuchformularComponent.setFamilienstand', familienstand);
-        this.#familienstand = familienstand;
+    setGeschlecht(geschlecht: string) {
+        log.debug('SuchformularComponent.setGeschlecht', geschlecht);
+        this.#geschlecht = geschlecht as GeschlechtType;
+    }
+
+    setSport(isChecked: boolean) {
+        log.debug('SuchformularComponent.setSport', isChecked);
+        this.#sport = isChecked;
     }
 
     setLesen(isChecked: boolean) {
@@ -62,46 +86,29 @@ export class SuchformularComponent {
         this.#reisen = isChecked;
     }
 
-    setSport(isChecked: boolean) {
-        log.debug('SuchformularComponent.setSport', isChecked);
-        this.#sport = isChecked;
-    }
-
     /**
-     * Suche nach B&uuml;chern, die den spezfizierten Suchkriterien entsprechen
-     * @return false, um das durch den Button-Klick ausgel&ouml;ste Ereignis
-     *         zu konsumieren.
+     * Suche nach Kunden, die den spezfizierten Suchkriterien entsprechen
      */
     onSubmit() {
         log.debug(
-            'SuchformularComponent.onSubmit: nachname / geschlechtType / familienstand / lesen / reisen / sport',
+            'SuchformularComponent.onSubmit: nachname / familienstand / geschlecht / sport / lesen / reisen',
             this.#nachname,
-            this.#geschlechtType,
             this.#familienstand,
+            this.#geschlecht,
+            this.#sport,
             this.#lesen,
             this.#reisen,
-            this.#sport,
         );
 
         this.suchkriterien$.next({
             nachname: this.#nachname,
-            geschlechtType: this.#geschlechtType,
             familienstand: this.#familienstand,
+            geschlecht: this.#geschlecht,
             interessen: {
+                sport: this.#sport,
                 lesen: this.#lesen,
                 reisen: this.#reisen,
-                sport: this.#sport,
             },
         });
-
-        // Inspektion der Komponente mit dem Tag-Namen "app" im Debugger
-        // Voraussetzung: globale Variable ng deklarieren (s.o.)
-        // const app = document.querySelector('app')
-        // global.ng.probe(app)
-
-        // damit das (Submit-) Ereignis konsumiert wird und nicht an
-        // uebergeordnete Eltern-Komponenten propagiert wird bis zum
-        // Refresh der gesamten Seite.
-        return false;
     }
 }

@@ -1,0 +1,13 @@
+<div class="row">
+  <mat-form-field>
+    <mat-label for="nachnameInput">Nachname</mat-label>
+    <input
+      id="nachnameInput"
+      matInput
+      placeholder="Den Nachnamen eingeben"
+      [(ngModel)]="nachname"
+      name="nachname"
+      (blur)="onBlur()"
+    />
+  </mat-form-field>
+</div>

@@ -1,17 +1,36 @@
-<mat-form-field
-  appearance="outline"
-  class="userInputField"
-  [formGroup]="createForm"
->
-  <mat-label for="betragInput">Umsatz</mat-label>
+<mat-form-field class="col col-10 gy-3" [formGroup]="form">
+  <mat-label for="betragInput">Betrag</mat-label>
+  <div class="checkbox-icon" *ngIf="!betrag.errors">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      style="height: 20px; position: absolute; right: 0; color: green"
+      class=""
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  </div>
   <input
-    id="betragInput"
     matInput
-    placeholder="ex. 4999"
-    autocomplete="off"
+    id="betragInput"
+    placeholder="Betrag, z.B. 12345.67"
+    type="number"
+    required
+    formControlName="betrag"
     [class.is-invalid]="betrag.invalid && betrag.touched"
     [class.is-valid]="betrag.valid && betrag.touched"
-    formControlName="betrag"
   />
-  <mat-hint>Bitte den Umsatz eingeben</mat-hint>
+  <mat-error *ngIf="betrag.invalid && betrag.touched && betrag.errors">
+    <mat-icon>error</mat-icon>
+    <span class="ms-1" *ngIf="betrag.errors['required']">
+      Der Betrag muss eingegeben werden, z.B. 12345.67.
+    </span>
+  </mat-error>
 </mat-form-field>
