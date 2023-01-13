@@ -1,0 +1,14 @@
+' Preview durch <Alt>d
+
+@startuml CreateKunden
+
+'top to bottom direction
+
+rectangle CreateKunden
+rectangle CreateNachname
+rectangle CreateEmail
+
+CreateKunden --> CreateNachname
+CreateKunden --> CreateEmail
+
+@enduml

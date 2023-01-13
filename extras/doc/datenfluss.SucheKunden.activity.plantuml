@@ -1,0 +1,23 @@
+' Preview durch <Alt>d
+' https://plantuml.com/de/activity-diagram-beta
+' https://plantuml.com/de/guide
+
+@startuml Datenfluss
+
+start
+
+:Suchformular;
+-> Suchkriterien;
+:SucheKunden;
+-> Liste gefundener Kunden;
+:Suchergebnis;
+
+if (mind. 1 Kunde gefunden?) then (ja)
+  :GefundeneKunden;
+else (nein)
+  :ErrorMessage;
+endif
+
+end
+
+@enduml

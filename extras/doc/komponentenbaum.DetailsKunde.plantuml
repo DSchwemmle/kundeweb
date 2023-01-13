@@ -1,0 +1,26 @@
+' Preview durch <Alt>d
+
+@startuml DetailsKunde
+
+'top to bottom direction
+
+rectangle DetailsKunde
+rectangle Waiting
+rectangle DetailsBreadcrumbs
+rectangle DetailsStammdaten
+rectangle DetailsInteressen
+rectangle DetailsBearbeiten
+
+DetailsKunde --> Waiting
+DetailsKunde --> DetailsBreadcrumbs
+DetailsKunde --> DetailsStammdaten
+DetailsKunde --> DetailsInteressen
+DetailsKunde --> DetailsBearbeiten
+
+rectangle DetailsEmail
+rectangle DetailsNachname
+
+DetailsStammdaten --> DetailsEmail
+DetailsStammdaten --> DetailsNachname
+
+@enduml

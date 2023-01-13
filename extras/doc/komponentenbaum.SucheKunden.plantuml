@@ -1,0 +1,28 @@
+' Preview durch <Alt>d
+
+@startuml SucheKunden
+
+'top to bottom direction
+
+rectangle SucheKunden
+rectangle Suchformular
+rectangle Waiting
+rectangle Suchergebnis
+
+SucheKunden --> Suchformular
+SucheKunden --> Waiting
+SucheKunden --> Suchergebnis
+
+rectangle SucheNachname
+rectangle SucheEmail
+
+Suchformular --> SucheNachname
+Suchformular --> SucheEmail
+
+rectangle ErrorMessage
+rectangle GefundeneKunden
+
+Suchergebnis --> ErrorMessage
+Suchergebnis --> GefundeneKunden
+
+@enduml
