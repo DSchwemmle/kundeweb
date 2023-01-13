@@ -31,7 +31,7 @@ import { type Kunde } from './kunde';
 import { type User } from './user';
 import log from 'loglevel';
 import { paths } from '../../shared/paths';
-import { toServerObject } from './kundeServer';
+// import { toServerObject } from './kundeServer';
 
 // Methoden der Klasse HttpClient
 //  * get(url, options) – HTTP GET request
@@ -69,8 +69,7 @@ export class KundeWriteService {
      * Einen neuen Kunden anlegen
      * @param neuerKunde Das JSON-Objekt mit dem neuen Kunden
      */
-    save(kunde: Kunde, user: User): Observable<SaveError | string> {
-        log.debug('KundeWriteService.save: kunde=', kunde, 'user=', user);
+    save(kunde: Kunde, userInput: User): Observable<SaveError | string> {
         log.debug('KundeWriteService.save: kunde=', kunde);
 
         const authorizationStr = `${this.authService.authorization}`;
@@ -87,8 +86,22 @@ export class KundeWriteService {
         });
         /* eslint-enable @typescript-eslint/naming-convention */
 
+        const user: User = {
+            username: userInput.username,
+            password: userInput.password,
+        };
+        log.debug('KundeWriteService.save: userInput=', user);
+
+        const customBody = {
+            kunde,
+            user,
+        };
+
+        const json = JSON.stringify(customBody);
+        log.debug('JSON = ', json);
+
         return this.httpClient
-            .post(this.#baseUrl, toServerObject(kunde, user), {
+            .post(this.#baseUrl, json, {
                 headers,
                 observe: 'response',
                 responseType: 'text',
