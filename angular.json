@@ -6,7 +6,8 @@
       "enabled": true,
       "path": "cache",
       "environment": "all"
-    }
+    },
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -62,6 +63,7 @@
             "styles": [
               "@angular/material/prebuilt-themes/deeppurple-amber.css",
               "src/styles.scss",
+              "@angular/material/prebuilt-themes/indigo-pink.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/angular-calendar/scss/angular-calendar.scss"
             ],

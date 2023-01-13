@@ -1,0 +1,25 @@
+{
+  "kunde": {
+    "nachname": "Test",
+    "email": "Tanja@Test.de",
+    "kategorie": 1,
+    "hasNewsletter": true,
+    "geburtsdatum": "2000-11-11",
+    "homepage": "https://www.acme.com",
+    "geschlecht": "WEIBLICH",
+    "familienstand": "LEDIG",
+    "interessen": [
+      "REISEN",
+      "LESEN"
+    ],
+    "umsatz": {
+      "betrag": "1",
+      "waehrung": "EUR"
+    },
+    "adresse": {
+      "plz": "12345",
+      "ort": "Testort"
+    },
+    "username": "test"
+  }
+}

@@ -32,7 +32,7 @@ spec:
     spec:
       serviceAccountName: acme-kundeweb
       containers:
-        - image: docker.io/juergenzimmermann/kundeweb:1.0.0
+        - image: docker.io/gruppe2/kundeweb:1.0.0
           name: kundeweb
           envFrom:
             - configMapRef:
@@ -61,3 +61,6 @@ spec:
               port: 80
             initialDelaySeconds: 3
             periodSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+

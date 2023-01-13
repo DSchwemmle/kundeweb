@@ -152,7 +152,7 @@ export class CreateKundeComponent {
             }
 
             default: {
-                this.errorMsg = 'Ein unbekannt Fehler ist aufgetreten.';
+                this.errorMsg = 'Ein unbekannter Fehler ist aufgetreten.';
                 break;
             }
         }

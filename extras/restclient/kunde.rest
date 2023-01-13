@@ -17,89 +17,78 @@
 // N e t z w e r k   -  V e r b i n d u n g   n o t w e n d i g
 //
 
-@restUrl = "https://localhost:8080"
-
 ### Login
 // @name login
-POST {{restUrl}}/rest/login
+POST {{localHTTPS}}/rest/login
 Content-Type: application/x-www-form-urlencoded
 
 username=admin&password=p
 
 ### Suche alle Kunden
-GET {{restUrl}}/rest/kunden
+GET {{localHTTPS}}/rest/kunden
 
 ### Suche mit vorhandener Kunde-ID
-GET {{restUrl}}/kunden/00000000-0000-0000-0000-000000000001
+GET {{localHTTPS}}/kunden/00000000-0000-0000-0000-000000000001
 
 ### Suche mit vorhandener Kunde-ID und Versionsnummer
-GET {{restUrl}}/kunden/00000000-0000-0000-0000-000000000001
+GET {{localHTTPS}}/kunden/00000000-0000-0000-0000-000000000001
 If-None-Match: 0
 
 ### Optionen zu Kunde-ID
-OPTIONS {{restUrl}}/rest/kunden/00000000-0000-0000-0000-000000000001
+OPTIONS {{localHTTPS}}/rest/kunden/00000000-0000-0000-0000-000000000001
 
 ### Suche mit ungueltiger Kunde-ID
-GET {{restUrl}}/rest/kunden/YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY
+GET {{localHTTPS}}/rest/kunden/YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY
 
 ### Suche mit nicht-vorhandener Kunde-ID
-GET {{restUrl}}/rest/kunden/99999999-9999-9999-9999-999999999999
+GET {{localHTTPS}}/rest/kunden/99999999-9999-9999-9999-999999999999
 
-### Suche mit vorhandenem Kunde
-GET {{restUrl}}/rest/kunden?kunde=a
+### Suche mit vorhandenem Nachname
+GET {{localHTTPS}}/rest/kunden?nachname=Alpha
 
-### Suche mit vorhandener Email-Adresse
-GET {{restUrl}}/rest/kunden?email=phi@acme.cn
+### Suche mit vorhandenen Interessen
+GET {{localHTTPS}}/rest/kunden?lesen=true&reisen=true
 
-### Suche mit vorhandenen Interessenn
-GET {{restUrl}}/rest/kunden?lesen=true&reisen=true
-
-### Suche mit gueltigen Geschlecht
-GET {{restUrl}}/rest/kunden?geschlecht=WEIBLICH
-
-### Suche mit gueltiger Kategorie
-GET {{restUrl}}/rest/kunden?kategorie=1
-
-### Suche newslettere Kunden
-GET {{restUrl}}/rest/kunden?newsletter=true
+### Suche mit gueltigem Familienstand
+GET {{localHTTPS}}/rest/kunden?familienstand=LEDIG
 
 ### Neuen Kunden anlegen
-POST {{restUrl}}/rest/kunden
+POST {{localHTTPS}}/rest/kunden
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{userAdmin}} {{password}}
 
 < ./kunde-neu.json
 
 ### Neuen Kunden mit ungueltigen Daten anlegen
-POST {{restUrl}}/rest/kunden
+POST {{localHTTPS}}/rest/kunden
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{userAdmin}} {{password}}}
 
 < ./kunde-neu-invalid.json
 
 ### Vorhandenen Kunden aktualisieren
-PUT {{restUrl}}/rest/kunden/00000000-0000-0000-0000-000000000003
+PUT {{localHTTPS}}/rest/kunden/00000000-0000-0000-0000-000000000003
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{userAdmin}} {{password}}
 If-Match: 0
 
 < ./kunde-3-put.json
 
 ### Vorhandenen Kunden *OHNE* Versionsnummer aktualisieren
-PUT {{restUrl}}/rest/kunden/00000000-0000-0000-0000-000000000003
+PUT {{localHTTPS}}/rest/kunden/00000000-0000-0000-0000-000000000003
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{userAdmin}} {{password}}
 
 < ./kunde-3-put.json
 
 ### Vorhandenen Kunden mit ungueltigen Daten aktualisieren
-PUT {{restUrl}}/rest/kunden/00000000-0000-0000-0000-000000000003
+PUT {{localHTTPS}}/rest/kunden/00000000-0000-0000-0000-000000000003
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{userAdmin}} {{password}}}
 If-Match: 0
 
 < ./kunde-3-put-invalid.json
 
 ### Loeschen eines vorhandenen Kunden
-DELETE {{restUrl}}/rest/kunden/00000000-0000-0000-0000-000000000005
-Authorization: Bearer {{login.response.body.$.token}}
+DELETE {{localHTTPS}}/rest/kunden/00000000-0000-0000-0000-000000000005
+Authorization: Bearer {{userAdmin}} {{password}}
